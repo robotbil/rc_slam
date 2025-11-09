@@ -52,7 +52,7 @@ def launch_setup(context):
         controller,
         lidar,
         TimerAction(period=5.0, actions=[slam]),
-        TimerAction(period=10.0, actions=[nav2])
+        TimerAction(period=0.0, actions=[nav2])
     ]
 
 
