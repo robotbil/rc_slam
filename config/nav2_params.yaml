@@ -67,11 +67,12 @@ bt_navigator:
 
 controller_server:
   ros__parameters:
-    controller_frequency: 20.0
+    controller_frequency: 5.0
     costmap_update_timeout: 0.30
-    min_x_velocity_threshold: 0.001
+    min_x_velocity_threshold: 0.0
+    # min_x_velocity_threshold: 0.05
     min_y_velocity_threshold: 0.5
-    min_theta_velocity_threshold: 0.001
+    min_theta_velocity_threshold: 0.01
     failure_tolerance: 0.3
     progress_checker_plugins: ["progress_checker"]
     goal_checker_plugins: ["general_goal_checker"] # "precise_goal_checker"
@@ -93,11 +94,11 @@ controller_server:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.5
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
       time_steps: 56
-      model_dt: 0.05
+      model_dt: 0.2
       batch_size: 2000
       ax_max: 3.0
       ax_min: -3.0
@@ -107,10 +108,10 @@ controller_server:
       vx_std: 0.2
       vy_std: 0.2
       wz_std: 0.4
-      vx_max: 0.5
-      vx_min: -0.35
-      vy_max: 0.5
-      wz_max: 1.9
+      vx_max: 0.2
+      vx_min: -0.2
+      vy_max: 0.0
+      wz_max: 0.5
       iteration_count: 1
       prune_distance: 1.7
       transform_tolerance: 0.1
@@ -193,9 +194,11 @@ local_costmap:
       global_frame: odom
       robot_base_frame: base_link
       rolling_window: true
-      width: 3
-      height: 3
-      resolution: 0.05
+      origin_x: -2.5
+      origin_y: -2.5
+      width: 5
+      height: 5
+      resolution: 0.03
       robot_radius: 0.22
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
@@ -213,7 +216,7 @@ local_costmap:
         mark_threshold: 0
         observation_sources: scan
         scan:
-          topic: /scan
+          topic: /sensors/lidar/scan_raw
           max_obstacle_height: 2.0
           clearing: True
           marking: True
@@ -235,15 +238,20 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       robot_radius: 0.22
-      resolution: 0.05
+      # origin_x: -5.0
+      # origin_y: -5.0
+      # width: 10.0
+      # height: 10.0
+      resolution: 0.03
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      # plugins: ["static_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
         observation_sources: scan
         scan:
-          topic: /scan
+          topic: /sensors/lidar/scan_raw
           max_obstacle_height: 2.0
           clearing: True
           marking: True
@@ -367,7 +375,8 @@ velocity_smoother:
     max_decel: [-2.5, 0.0, -3.2]
     odom_topic: "odom"
     odom_duration: 0.1
-    deadband_velocity: [0.0, 0.0, 0.0]
+    # deadband_velocity: [0.0, 0.0, 0.0]
+    deadband_velocity: [0.05, 0.0, 0.05]
     velocity_timeout: 1.0
 
 collision_monitor:
@@ -396,7 +405,7 @@ collision_monitor:
     observation_sources: ["scan"]
     scan:
       type: "scan"
-      topic: "scan"
+      topic: "sensors/lidar/scan_raw"
       min_height: 0.15
       max_height: 2.0
       enabled: True
